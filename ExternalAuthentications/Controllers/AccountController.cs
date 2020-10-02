@@ -42,6 +42,7 @@ namespace ExternalAuthentications.Controllers
         {
             string redirectUrl = Url.Action("ExternalLoginCallback", "Account");
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            
             return new ChallengeResult(provider, properties);
         }
 
