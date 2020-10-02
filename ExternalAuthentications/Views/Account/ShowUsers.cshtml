@@ -1,0 +1,21 @@
+﻿@model IEnumerable<UserModel>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>UserName</th>
+                </tr>
+            </thead>
+            <tbody class="table table-striped">
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Email</td>
+                        <td>@item.UserName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
