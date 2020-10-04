@@ -1,8 +1,11 @@
-﻿using ExternalAuthentications.Models;
+﻿using AutoMapper;
+using ExternalAuthentications.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,40 +16,35 @@ namespace ExternalAuthentications.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IMapper _mapper;
 
-        public AccountController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
+        public AccountController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-        }
-
-        [AllowAnonymous]
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> Login()
         {
+            var providers = await _signInManager.GetExternalAuthenticationSchemesAsync();
             var model = new LoginModel
             {
-                ExternalProviders = await _signInManager.GetExternalAuthenticationSchemesAsync()
+                ExternalProviders = _mapper.Map<IEnumerable<AuthenticationProviderModel>>(providers)
             };
 
             return View(model);
         }
 
-        public IActionResult ExternalLogin(string provider)
+        public IActionResult ExternalLogin(string providerName)
         {
-            string redirectUrl = Url.Action("ExternalLoginCallback", "Account");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            
-            return new ChallengeResult(provider, properties);
+            string redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(providerName, redirectUrl);
+
+            return new ChallengeResult(providerName, properties);
         }
 
-        [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = "~/")
         {
             ExternalLoginInfo info = await _signInManager.GetExternalLoginInfoAsync();
@@ -57,8 +55,8 @@ namespace ExternalAuthentications.Controllers
             }
 
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-            var email = info.Principal.FindFirst(ClaimTypes.Email).Value;
-            var userName = info.Principal.FindFirst(ClaimTypes.Name).Value;
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var userName = info.Principal.FindFirstValue(ClaimTypes.Name);
 
             if (result.Succeeded)
             {

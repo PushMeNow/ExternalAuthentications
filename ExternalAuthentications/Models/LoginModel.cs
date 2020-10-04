@@ -8,6 +8,6 @@ namespace ExternalAuthentications.Models
         public string Email { get; set; }
         public string Password { get; set; }
 
-        public IEnumerable<AuthenticationScheme> ExternalProviders { get; set; }
+        public IEnumerable<AuthenticationProviderModel> ExternalProviders { get; set; }
     }
 }

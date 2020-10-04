@@ -1,13 +1,14 @@
+using AutoMapper;
 using ExternalAuthentications.DataAccess;
 using ExternalAuthentications.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Reflection;
 
 namespace ExternalAuthentications
 {
@@ -23,7 +24,6 @@ namespace ExternalAuthentications
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            //services.AddRazorPages();
 
             services.AddDbContext<CurrentDbContext>(options =>
             {
@@ -39,48 +39,17 @@ namespace ExternalAuthentications
                 {
                     options.ClientId = Configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
-                    //options.CorrelationCookie.SameSite = SameSiteMode.None;
                 })
-                //.AddOAuth("GitHub", "GitHub", configs =>
-                //{
-                //    configs.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-                //    configs.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                //    configs.UserInformationEndpoint = "https://api.github.com/user";
-                //    configs.SaveTokens = true;
-                //    configs.ClientId = Configuration["Authentication:GitHub:ClientId"];
-                //    configs.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
-                //    configs.CallbackPath = new PathString("/account/externallogincallback");
-                //    configs.CorrelationCookie.SameSite = SameSiteMode.Unspecified;
-
-                //    configs.Scope.Add("user");
-                //});
                 .AddGitHub(options =>
                 {
                     options.ClientId = Configuration["Authentication:GitHub:ClientId"];
                     options.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
-                    //options.CorrelationCookie.SameSite = SameSiteMode.None;
-                    options.Scope.Add("user");
-                    //options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                    //options.CallbackPath = new PathString("/account/externallogincallback");
-                    
-                    //options.Events = new OAuthEvents
-                    //{
-                    //    OnCreatingTicket = async context =>
-                    //    {
-                    //        var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                    //        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    //        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                    //        request.Headers.Add("Access-Control-Allow-Origin", "https://localhost:5000");
-                    //        var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                    //        response.EnsureSuccessStatusCode();
-                    //        var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-                    //        context.RunClaimActions(json.RootElement);
-                    //    }
-                    //};
+                    options.Scope.Add(Configuration["Authentication:GitHub:Scope"]);
                 });
 
             services.AddMvc();
             services.ConfigureNonBreakingSameSiteCookies();
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

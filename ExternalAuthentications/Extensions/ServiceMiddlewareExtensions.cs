@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ExternalAuthentications.Extensions
 {
@@ -75,7 +71,7 @@ namespace ExternalAuthentications.Extensions
             // This does not include:
             //   - Chrome on Mac OS X
             // because they do not use the Mac OS networking stack.
-            // Notes from Thinktecture: 
+            // Notes from Thinktecture:
             // Regarding https://caniuse.com/#search=samesite MacOS X versions lower
             // than 10.14 are not supporting SameSite at all. Starting with version
             // 10.15 unknown values are NOT treated as strict anymore. Therefore we
