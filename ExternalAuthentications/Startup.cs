@@ -1,4 +1,5 @@
 using ExternalAuthentications.DataAccess;
+using ExternalAuthentications.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -38,6 +39,7 @@ namespace ExternalAuthentications
                 {
                     options.ClientId = Configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                    //options.CorrelationCookie.SameSite = SameSiteMode.None;
                 })
                 //.AddOAuth("GitHub", "GitHub", configs =>
                 //{
@@ -56,9 +58,11 @@ namespace ExternalAuthentications
                 {
                     options.ClientId = Configuration["Authentication:GitHub:ClientId"];
                     options.ClientSecret = Configuration["Authentication:GitHub:ClientSecret"];
+                    //options.CorrelationCookie.SameSite = SameSiteMode.None;
                     options.Scope.Add("user");
                     //options.TokenEndpoint = "https://github.com/login/oauth/access_token";
                     //options.CallbackPath = new PathString("/account/externallogincallback");
+                    
                     //options.Events = new OAuthEvents
                     //{
                     //    OnCreatingTicket = async context =>
@@ -76,6 +80,7 @@ namespace ExternalAuthentications
                 });
 
             services.AddMvc();
+            services.ConfigureNonBreakingSameSiteCookies();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -92,12 +97,7 @@ namespace ExternalAuthentications
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
-                Secure = CookieSecurePolicy.Always,
-                MinimumSameSitePolicy = SameSiteMode.Strict
-            });
+            app.UseCookiePolicy();
 
             app.UseAuthentication();
             app.UseAuthorization();
